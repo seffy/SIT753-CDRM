@@ -2,13 +2,14 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node18' // Make sure NodeJS is installed in Manage Jenkins > Tools
+        nodejs 'node18' // Ensure NodeJS is configured in Jenkins > Global Tool Configuration
     }
 
     environment {
+        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH" // 👈 Adds Docker path for macOS
         PORT = '8087'
-        MONGO_URI = credentials('mongo-uri')          // Add in Jenkins: Secret text
-        SESSION_SECRET = credentials('session-secret') // Add in Jenkins: Secret text
+        MONGO_URI = credentials('mongo-uri')             // Set this in Jenkins > Credentials
+        SESSION_SECRET = credentials('session-secret')   // Set this too
     }
 
     stages {

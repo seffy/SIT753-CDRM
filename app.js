@@ -28,6 +28,7 @@ app.use(session({
 
 app.use(methodOverride('_method'));
 
+
 // Register routes
 const authRoutes = require('./app/routes/auth');
 const homeRoutes = require('./app/routes/home');
@@ -76,6 +77,9 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
+
+
+module.exports = app; 
 
 
 // Start server

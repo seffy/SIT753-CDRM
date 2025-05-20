@@ -2,15 +2,13 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node18'
+        nodejs 'node18' // Make sure NodeJS is installed in Manage Jenkins > Tools
     }
 
     environment {
         PORT = '8087'
-        MONGO_URI = credentials('mongo-uri')
-        SESSION_SECRET = credentials('session-secret')
-        // For Mac M1 Docker compatibility
-        PATH = "/usr/local/bin:/Applications/Docker.app/Contents/Resources/bin:$PATH"
+        MONGO_URI = credentials('mongo-uri')          // Add in Jenkins: Secret text
+        SESSION_SECRET = credentials('session-secret') // Add in Jenkins: Secret text
     }
 
     stages {
@@ -24,7 +22,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Installing dependencies and building...'
-                sh 'npm ci' // Using ci for cleaner installs than npm install
+                sh 'npm install'
                 sh 'npm run build || echo "No build script found, skipping..."'
             }
         }
@@ -33,41 +31,27 @@ pipeline {
             steps {
                 echo 'Running tests...'
                 sh 'npm test || echo "No tests defined, continuing..."'
-                // Add test reporting if available
-                junit '**/test-results.xml' allowEmptyResults: true
             }
         }
 
         stage('Code Quality') {
             steps {
                 echo 'Running ESLint...'
-                sh 'npx eslint . -f junit -o eslint-report.xml || echo "Linting completed with findings"'
-                archiveArtifacts 'eslint-report.xml'
+                sh 'npx eslint . || echo "Linting warnings or errors detected"'
             }
         }
 
         stage('Security Scan') {
             steps {
                 echo 'Running Trivy scan...'
-                sh '''
-                    trivy fs --security-checks vuln --format template \
-                    --template "@contrib/junit.tpl" -o trivy-report.xml . || true
-                '''
-                archiveArtifacts 'trivy-report.xml'
+                sh 'trivy fs . || echo "Security scan completed (check logs for results)"'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 echo 'Building Docker image...'
-                script {
-                    // For Mac M1, we should build with platform if needed
-                    def dockerBuildCommand = 'docker build -t sit753-cdrm .'
-                    if (isUnix()) {
-                        dockerBuildCommand = 'docker buildx build --platform linux/amd64 -t sit753-cdrm .'
-                    }
-                    sh dockerBuildCommand
-                }
+                sh 'docker build -t sit753-cdrm .'
             }
         }
 
@@ -91,16 +75,9 @@ pipeline {
     post {
         always {
             echo 'Pipeline completed.'
-            // Clean up workspace
-            cleanWs()
-        }
-        success {
-            echo 'Pipeline succeeded!'
-            // Optional: Add notifications here
         }
         failure {
             echo 'Pipeline failed! Please check the logs.'
-            // Optional: Add failure notifications here
         }
     }
 }

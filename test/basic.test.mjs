@@ -1,4 +1,4 @@
-const assert = require('assert');
+import assert from 'assert';
 
 describe('Simple Logic Test', () => {
   it('should return true', () => {

@@ -6,8 +6,8 @@ pipeline {
     }
 
     environment {
-        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH" // 👈 Adds Docker path for macOS
-        PORT = '8087'
+        PATH = "/usr/local/bin:/opt/homebrew/bin:$PATH" // Adds Docker path for macOS
+        PORT = '3753'
         MONGO_URI = credentials('mongo-uri')             // Set this in Jenkins > Credentials
         SESSION_SECRET = credentials('session-secret')   // Set this too
     }
@@ -63,7 +63,7 @@ pipeline {
                     docker stop sit753-cdrm || true
                     docker rm sit753-cdrm || true
                     docker run -d --name sit753-cdrm \
-                    -p 8087:8087 \
+                    -p 3753:3753 \
                     -e MONGO_URI="$MONGO_URI" \
                     -e SESSION_SECRET="$SESSION_SECRET" \
                     -e PORT="$PORT" \

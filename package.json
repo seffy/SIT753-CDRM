@@ -1,7 +1,6 @@
 {
   "name": "yesonit-crm",
   "version": "1.0.0",
-  "type": "module",
   "description": "**y!on8** (pronounced \"yes, on it\") is a modular, cloud-native enterprise platform built to streamline internal workflows for small to medium enterprises (SMEs). Each application within the platform is designed and deployed as an independent microservice, allowing for better scalability, flexibility, and maintenance.",
   "main": "app.js",
   "scripts": {

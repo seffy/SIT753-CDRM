@@ -1,4 +1,3 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
@@ -7,10 +6,17 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const methodOverride = require('method-override');
 
-// Import Mongoose connection (see config/db.js)
-const mongoose = require('./config/db');
+// 🔹 ADD prom-client for metrics
+const client = require('prom-client');
+client.collectDefaultMetrics(); // collects default Node.js metrics
 
 const app = express();
+
+// 🔹 ADD /metrics endpoint
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', client.register.contentType);
+  res.end(await client.register.metrics());
+});
 
 // Set EJS as templating engine
 app.set('view engine', 'ejs');
@@ -28,28 +34,19 @@ app.use(session({
 
 app.use(methodOverride('_method'));
 
-
-// Register routes
+// Routes and middlewares (unchanged)
 const authRoutes = require('./app/routes/auth');
 const homeRoutes = require('./app/routes/home');
 const adminRoutes = require('./app/routes/admin');
 const manageUsersRoutes = require('./app/routes/manageUsers');
 const secureDownloadRoutes = require('./app/routes/secureDownload');
-
 const contentRoutes = require('./app/routes/content');
 const myRequestsRoutes = require('./app/routes/myRequests');
 const allRequestsRoutes = require('./app/routes/allRequests');
 const mainContentRoutes = require('./app/routes/mainContent');
-
 const setUser = require('./app/middlewares/setUser');
+
 app.use(setUser);
-
-
-// Import tools access routes
-// const toolsRoutes = require('./app/modules/toolsAccess/routes/tools');
-
-
-
 app.use('/download', secureDownloadRoutes);
 app.use('/manage-users', manageUsersRoutes);
 app.use('/content-manager', mainContentRoutes);
@@ -60,8 +57,7 @@ app.use('/content', contentRoutes);
 app.use('/my-requests', myRequestsRoutes);
 app.use('/all-requests', allRequestsRoutes);
 
-
-
+// Optional user session check
 app.use(async (req, res, next) => {
   if (req.session.userId) {
     res.locals.user = await User.findById(req.session.userId);
@@ -69,21 +65,14 @@ app.use(async (req, res, next) => {
   next();
 });
 
-
-
-// Auto-create uploads folder if missing
+// Auto-create uploads folder
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
-
-
-module.exports = app; 
-
-
 // Start server
 const PORT = process.env.PORT || 3753;
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

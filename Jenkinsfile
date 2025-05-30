@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'node18' // Ensure NodeJS is configured in Jenkins > Global Tool Configuration
+        nodejs 'node18' // Ensure NodeJS is configured in Jenkins >  Tool Configuration
     }
 
     environment {
@@ -58,7 +58,7 @@ pipeline {
 
         stage('Deploy Container') {
             steps {
-                echo 'Deploying Docker container on port 8087...'
+                echo 'Deploying Docker container on port 3753...'
                 sh '''
                     docker stop sit753-cdrm || true
                     docker rm sit753-cdrm || true
